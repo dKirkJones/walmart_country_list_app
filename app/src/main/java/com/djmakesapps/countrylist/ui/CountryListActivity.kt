@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.djmakesapps.countrylist.R
@@ -23,14 +25,16 @@ class CountryListActivity : AppCompatActivity(), CountryListAdapter.OnItemClickL
     lateinit var recyclerViewCountries: RecyclerView
 
     private val viewModel: CountryViewModel by viewModels()
+    private lateinit var progressBar: ProgressBar
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        setContentView(R.layout.activity_recycler_view)
-
+        setContentView(R.layout.activity_country_list)
+        progressBar =  findViewById<ProgressBar>(R.id.progress_bar)
         recyclerViewCountries = findViewById(R.id.country_recycler_view)
+
         linearLayoutManager = LinearLayoutManager(this)
         recyclerViewCountries.layoutManager = linearLayoutManager
         myAdapter = CountryListAdapter(emptyList(), this)
@@ -39,9 +43,11 @@ class CountryListActivity : AppCompatActivity(), CountryListAdapter.OnItemClickL
         viewModel.countriesLiveData.observe(this) {
             myAdapter.countryList = it
             myAdapter.notifyDataSetChanged()
+            progressBar.isVisible = false
         }
 
         viewModel.exceptionLiveData.observe(this) {
+            progressBar.isVisible = false
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         }
 
